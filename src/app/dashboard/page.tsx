@@ -338,15 +338,15 @@ export default function DashboardPage() {
                 </div>
                 <div className="bg-green-500/10 border border-green-500/30 rounded-lg p-4 text-center">
                   <div className="text-3xl font-bold text-green-400">{selectedApp.stats.passed}</div>
-                  <div className="text-xs text-gray-500 mt-1">Passed</div>
+                  <div className="text-xs text-gray-500 mt-1">Last Run Passed</div>
                 </div>
                 <div className="bg-red-500/10 border border-red-500/30 rounded-lg p-4 text-center">
                   <div className="text-3xl font-bold text-red-400">{selectedApp.stats.failed}</div>
-                  <div className="text-xs text-gray-500 mt-1">Failed</div>
+                  <div className="text-xs text-gray-500 mt-1">Last Run Failed</div>
                 </div>
                 <div className="bg-emerald-500/10 border border-emerald-500/30 rounded-lg p-4 text-center">
                   <div className="text-3xl font-bold text-emerald-400">{selectedApp.stats.passRate}%</div>
-                  <div className="text-xs text-gray-500 mt-1">Pass Rate</div>
+                  <div className="text-xs text-gray-500 mt-1">Last Run Pass Rate</div>
                 </div>
               </div>
 

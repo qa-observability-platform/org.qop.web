@@ -449,7 +449,7 @@ export default function ComparativeAnalysis({ currentRunId, applicationId }: Com
               <option value="">Select job to compare...</option>
               {jobs.map((job) => (
                 <option key={job.id} value={job.id}>
-                  Job #{job.job_number} - {job.pass_rate}% pass ({formatDate(job.started_at)})
+                  Job #{job.job_number} — {job.total_tests} tests, {job.pass_rate}% pass ({formatDate(job.started_at)})
                 </option>
               ))}
             </select>
@@ -659,53 +659,95 @@ export default function ComparativeAnalysis({ currentRunId, applicationId }: Com
             {/* Modal Content */}
             <div className="flex-1 overflow-y-auto p-6 space-y-6">
               {/* Metrics Comparison */}
-              <div className="grid grid-cols-2 gap-4">
-                {/* Current Run */}
-                <div className="bg-red-900/10 border border-red-700/50 rounded-lg p-4">
-                  <div className="text-sm text-gray-400 mb-2">Current Run (Job #{comparison.currentRun.jobNumber})</div>
-                  <div className="grid grid-cols-2 gap-3 text-sm">
-                    <div>
-                      <span className="text-gray-400">Total: </span>
-                      <span className="text-white font-semibold">{comparison.currentRun.metrics.totalTests}</span>
-                    </div>
-                    <div>
-                      <span className="text-gray-400">Pass Rate: </span>
-                      <span className="text-white font-semibold">{comparison.currentRun.metrics.passRate}%</span>
-                    </div>
-                    <div>
-                      <span className="text-gray-400">Passed: </span>
-                      <span className="text-green-400 font-semibold">{comparison.currentRun.metrics.passedTests}</span>
-                    </div>
-                    <div>
-                      <span className="text-gray-400">Failed: </span>
-                      <span className="text-red-400 font-semibold">{comparison.currentRun.metrics.failedTests}</span>
-                    </div>
-                  </div>
-                </div>
+              {(() => {
+                const cur = comparison.currentRun.metrics;
+                const prev = comparison.compareRun.metrics;
+                const totalDiff = cur.totalTests - prev.totalTests;
+                const passedDiff = cur.passedTests - prev.passedTests;
+                const failedDiff = cur.failedTests - prev.failedTests;
+                const rateDiff = parseFloat(cur.passRate) - parseFloat(prev.passRate);
+                const countMismatch = cur.totalTests !== prev.totalTests;
 
-                {/* Compare Run */}
-                <div className="bg-green-900/10 border border-green-700/50 rounded-lg p-4">
-                  <div className="text-sm text-gray-400 mb-2">Previous Run (Job #{comparison.compareRun.jobNumber})</div>
-                  <div className="grid grid-cols-2 gap-3 text-sm">
-                    <div>
-                      <span className="text-gray-400">Total: </span>
-                      <span className="text-white font-semibold">{comparison.compareRun.metrics.totalTests}</span>
+                const delta = (val: number, invert = false) => {
+                  if (val === 0) return <span className="text-gray-500 text-xs ml-1">(no change)</span>;
+                  const positive = invert ? val < 0 : val > 0;
+                  return (
+                    <span className={`text-xs ml-1 font-medium ${positive ? 'text-green-400' : 'text-red-400'}`}>
+                      {val > 0 ? '+' : ''}{val}
+                    </span>
+                  );
+                };
+
+                return (
+                  <>
+                    {/* Test count mismatch warning */}
+                    {countMismatch && (
+                      <div className="flex items-start gap-2 p-3 bg-yellow-900/20 border border-yellow-600/50 rounded-lg text-sm">
+                        <svg className="w-4 h-4 text-yellow-400 mt-0.5 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0z" />
+                        </svg>
+                        <span className="text-yellow-300">
+                          <strong>Test count differs:</strong> current run has <strong>{cur.totalTests}</strong> tests vs previous run&apos;s <strong>{prev.totalTests}</strong> ({totalDiff > 0 ? '+' : ''}{totalDiff} tests). Pass rate % comparison may be misleading — check the Changes Summary below for added/removed tests.
+                        </span>
+                      </div>
+                    )}
+
+                    <div className="grid grid-cols-2 gap-4">
+                      {/* Current Run */}
+                      <div className="bg-slate-800/60 border border-slate-600 rounded-lg p-4">
+                        <div className="text-xs font-semibold text-slate-400 uppercase tracking-wide mb-3">
+                          Current Run — Job #{comparison.currentRun.jobNumber}
+                        </div>
+                        <div className="space-y-2 text-sm">
+                          <div className="flex justify-between items-center">
+                            <span className="text-gray-400">Total Tests</span>
+                            <span className="text-white font-bold">{cur.totalTests}{countMismatch && delta(totalDiff)}</span>
+                          </div>
+                          <div className="flex justify-between items-center">
+                            <span className="text-gray-400">Pass Rate</span>
+                            <span className={`font-bold ${parseFloat(cur.passRate) >= parseFloat(prev.passRate) ? 'text-green-400' : 'text-red-400'}`}>
+                              {cur.passRate}%{delta(parseFloat(rateDiff.toFixed(1)))}
+                            </span>
+                          </div>
+                          <div className="flex justify-between items-center">
+                            <span className="text-gray-400">Passed</span>
+                            <span className="text-green-400 font-semibold">{cur.passedTests}{delta(passedDiff)}</span>
+                          </div>
+                          <div className="flex justify-between items-center">
+                            <span className="text-gray-400">Failed</span>
+                            <span className="text-red-400 font-semibold">{cur.failedTests}{delta(failedDiff, true)}</span>
+                          </div>
+                        </div>
+                      </div>
+
+                      {/* Previous Run */}
+                      <div className="bg-slate-800/60 border border-slate-600 rounded-lg p-4">
+                        <div className="text-xs font-semibold text-slate-400 uppercase tracking-wide mb-3">
+                          Previous Run — Job #{comparison.compareRun.jobNumber}
+                        </div>
+                        <div className="space-y-2 text-sm">
+                          <div className="flex justify-between items-center">
+                            <span className="text-gray-400">Total Tests</span>
+                            <span className="text-white font-bold">{prev.totalTests}</span>
+                          </div>
+                          <div className="flex justify-between items-center">
+                            <span className="text-gray-400">Pass Rate</span>
+                            <span className="text-white font-bold">{prev.passRate}%</span>
+                          </div>
+                          <div className="flex justify-between items-center">
+                            <span className="text-gray-400">Passed</span>
+                            <span className="text-green-400 font-semibold">{prev.passedTests}</span>
+                          </div>
+                          <div className="flex justify-between items-center">
+                            <span className="text-gray-400">Failed</span>
+                            <span className="text-red-400 font-semibold">{prev.failedTests}</span>
+                          </div>
+                        </div>
+                      </div>
                     </div>
-                    <div>
-                      <span className="text-gray-400">Pass Rate: </span>
-                      <span className="text-white font-semibold">{comparison.compareRun.metrics.passRate}%</span>
-                    </div>
-                    <div>
-                      <span className="text-gray-400">Passed: </span>
-                      <span className="text-green-400 font-semibold">{comparison.compareRun.metrics.passedTests}</span>
-                    </div>
-                    <div>
-                      <span className="text-gray-400">Failed: </span>
-                      <span className="text-red-400 font-semibold">{comparison.compareRun.metrics.failedTests}</span>
-                    </div>
-                  </div>
-                </div>
-              </div>
+                  </>
+                );
+              })()}
 
               {/* Changes Summary */}
               <div className="bg-gray-800/50 border border-gray-700 rounded-lg p-4">

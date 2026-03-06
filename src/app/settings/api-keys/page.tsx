@@ -328,24 +328,69 @@ function ShowApiKeyModal({
   onCopy: () => void;
 }) {
   const [copied, setCopied] = useState(false);
+  const [envCopied, setEnvCopied] = useState(false);
+  const [activeTab, setActiveTab] = useState<'playwright' | 'puppeteer' | 'pytest' | 'selenium'>('playwright');
 
   const handleCopy = () => {
     onCopy();
     setCopied(true);
   };
 
+  const handleCopyEnv = () => {
+    navigator.clipboard.writeText(`QOP_API_KEY=${apiKey}`);
+    setEnvCopied(true);
+    setTimeout(() => setEnvCopied(false), 2000);
+  };
+
+  const frameworkSnippets = {
+    playwright: `# .env
+QOP_API_KEY=${apiKey}
+
+# playwright.config.ts
+export default defineConfig({
+  reporter: [['@qa-observability-platform/playwright']],
+});`,
+    puppeteer: `# .env
+QOP_API_KEY=${apiKey}
+
+# jest.config.js
+module.exports = {
+  reporters: ['default', '@qa-observability-platform/puppeteer'],
+};`,
+    pytest: `# .env
+QOP_API_KEY=${apiKey}
+
+# pytest.ini or pyproject.toml
+[pytest]
+addopts = -p qop_pytest.reporter`,
+    selenium: `# .env or system environment
+QOP_API_KEY=${apiKey}
+
+# testng.xml — add the QOP listener
+<listeners>
+  <listener class-name="com.qop.selenium.reporter.QopWebSocketReporter"/>
+</listeners>`,
+  };
+
+  const tabs = [
+    { key: 'playwright' as const, label: 'Playwright' },
+    { key: 'puppeteer' as const, label: 'Puppeteer' },
+    { key: 'pytest' as const, label: 'Pytest' },
+    { key: 'selenium' as const, label: 'Selenium' },
+  ];
+
   return (
     <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
-      <div className="bg-slate-900 rounded-xl border border-emerald-800 p-6 w-full max-w-lg">
+      <div className="bg-slate-900 rounded-xl border border-emerald-800 p-6 w-full max-w-2xl max-h-[90vh] overflow-y-auto">
         <h2 className="text-xl font-semibold text-emerald-300 mb-4">API Key Created!</h2>
 
         <div className="space-y-4">
           <div className="p-4 rounded bg-emerald-500/10 border border-emerald-500/30">
             <p className="text-sm text-emerald-300 mb-2">
-              ✓ API key <strong>{label}</strong> created successfully
+              API key <strong>{label}</strong> created successfully
             </p>
             <p className="text-xs text-emerald-400/70">
-              Copy this key now - it won't be shown again!
+              Copy this key now - it won&apos;t be shown again!
             </p>
           </div>
 
@@ -371,10 +416,52 @@ function ShowApiKeyModal({
             </div>
           </div>
 
+          {/* Quick Setup Section */}
+          <div className="border-t border-slate-800 pt-4">
+            <h3 className="text-sm font-semibold text-slate-300 mb-3">Quick Setup</h3>
+
+            <div className="flex gap-2 mb-3">
+              <button
+                onClick={handleCopyEnv}
+                className={`px-3 py-1.5 rounded text-xs font-medium transition-colors ${
+                  envCopied
+                    ? 'bg-emerald-500/20 text-emerald-300 border border-emerald-500/30'
+                    : 'bg-slate-800 hover:bg-slate-700 text-slate-300 border border-slate-700'
+                }`}
+              >
+                {envCopied ? 'Copied!' : 'Copy QOP_API_KEY=...'}
+              </button>
+            </div>
+
+            <div className="flex gap-1 mb-2">
+              {tabs.map((tab) => (
+                <button
+                  key={tab.key}
+                  onClick={() => setActiveTab(tab.key)}
+                  className={`px-3 py-1.5 rounded-t text-xs font-medium transition-colors ${
+                    activeTab === tab.key
+                      ? 'bg-slate-800 text-emerald-300 border border-slate-700 border-b-slate-800'
+                      : 'text-slate-500 hover:text-slate-300'
+                  }`}
+                >
+                  {tab.label}
+                </button>
+              ))}
+            </div>
+
+            <pre className="p-3 rounded bg-slate-800 border border-slate-700 text-xs text-slate-300 font-mono overflow-x-auto whitespace-pre-wrap">
+              {frameworkSnippets[activeTab]}
+            </pre>
+
+            <p className="text-xs text-slate-500 mt-2">
+              That&apos;s it! Your test reporter will auto-connect to QOP when you run your tests.
+            </p>
+          </div>
+
           <div className="p-4 rounded bg-amber-500/10 border border-amber-500/30">
             <p className="text-sm text-amber-300">
               <strong>Important:</strong> Store this key securely. For security reasons, we cannot
-              show it again. If you lose it, you'll need to create a new one.
+              show it again. If you lose it, you&apos;ll need to create a new one.
             </p>
           </div>
 
@@ -382,7 +469,7 @@ function ShowApiKeyModal({
             onClick={onClose}
             className="w-full px-4 py-2 rounded bg-slate-800 hover:bg-slate-700 text-sm"
           >
-            I've Saved My Key
+            I&apos;ve Saved My Key
           </button>
         </div>
       </div>

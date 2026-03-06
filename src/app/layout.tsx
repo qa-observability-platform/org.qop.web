@@ -78,6 +78,16 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
                     <div className="border-t border-slate-800 my-2"></div>
 
                     <Link
+                      href="/docs"
+                      className={`px-3 py-2 rounded-md transition-colors ${isActive('/docs')
+                          ? 'bg-slate-800 text-slate-100'
+                          : 'hover:bg-slate-800/50 text-slate-400'
+                        }`}
+                    >
+                      📖 Docs
+                    </Link>
+
+                    <Link
                       href="/organizations"
                       className={`px-3 py-2 rounded-md transition-colors ${isActive('/organizations')
                           ? 'bg-slate-800 text-slate-100'
