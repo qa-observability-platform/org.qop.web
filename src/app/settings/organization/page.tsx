@@ -4,8 +4,6 @@
 import { useState, useEffect } from 'react';
 import { useAuth } from '@/contexts/AuthContext';
 import { api, type Organization } from '@/lib/api';
-import { usePermission } from '@/components/PermissionGuard';
-
 export default function OrganizationSettingsPage() {
   const { getCurrentOrgId } = useAuth();
   const [organization, setOrganization] = useState<Organization | null>(null);
@@ -14,9 +12,6 @@ export default function OrganizationSettingsPage() {
   const [error, setError] = useState('');
   const [success, setSuccess] = useState('');
   const [isEditing, setIsEditing] = useState(false);
-
-  const canUpdate = usePermission('ORG_UPDATE');
-  const canDelete = usePermission('ORG_DELETE');
 
   const [formData, setFormData] = useState({
     name: '',
@@ -121,7 +116,7 @@ export default function OrganizationSettingsPage() {
               type="text"
               value={formData.name}
               onChange={(e) => setFormData({ ...formData, name: e.target.value })}
-              disabled={!isEditing || !canUpdate}
+              disabled={!isEditing}
               className="w-full px-3 py-2 rounded bg-slate-800 border border-slate-700 focus:border-emerald-500 focus:outline-none disabled:opacity-50 disabled:cursor-not-allowed"
               required
             />
@@ -136,7 +131,7 @@ export default function OrganizationSettingsPage() {
               onChange={(e) =>
                 setFormData({ ...formData, description: e.target.value })
               }
-              disabled={!isEditing || !canUpdate}
+              disabled={!isEditing}
               className="w-full px-3 py-2 rounded bg-slate-800 border border-slate-700 focus:border-emerald-500 focus:outline-none disabled:opacity-50 disabled:cursor-not-allowed"
               rows={3}
               placeholder="Brief description of your organization"
@@ -167,8 +162,7 @@ export default function OrganizationSettingsPage() {
             />
           </div>
 
-          {canUpdate && (
-            <div className="flex gap-3">
+          <div className="flex gap-3">
               {!isEditing ? (
                 <button
                   type="button"
@@ -203,7 +197,6 @@ export default function OrganizationSettingsPage() {
                 </>
               )}
             </div>
-          )}
         </form>
       </div>
 
@@ -239,25 +232,23 @@ export default function OrganizationSettingsPage() {
       </div>
 
       {/* Danger Zone */}
-      {canDelete && (
-        <div className="pt-6 border-t border-rose-800/50">
-          <h3 className="text-lg font-medium text-rose-300 mb-4">Danger Zone</h3>
-          <div className="p-4 rounded-lg bg-rose-500/10 border border-rose-500/30">
-            <div className="flex items-start justify-between">
-              <div>
-                <h4 className="font-medium text-rose-300">Delete Organization</h4>
-                <p className="text-sm text-slate-400 mt-1">
-                  Permanently delete this organization and all associated data. This action
-                  cannot be undone.
-                </p>
-              </div>
-              <button className="px-4 py-2 rounded bg-rose-500 hover:bg-rose-600 text-white text-sm font-medium transition-colors ml-4">
-                Delete Organization
-              </button>
+      <div className="pt-6 border-t border-rose-800/50">
+        <h3 className="text-lg font-medium text-rose-300 mb-4">Danger Zone</h3>
+        <div className="p-4 rounded-lg bg-rose-500/10 border border-rose-500/30">
+          <div className="flex items-start justify-between">
+            <div>
+              <h4 className="font-medium text-rose-300">Delete Organization</h4>
+              <p className="text-sm text-slate-400 mt-1">
+                Permanently delete this organization and all associated data. This action
+                cannot be undone.
+              </p>
             </div>
+            <button className="px-4 py-2 rounded bg-rose-500 hover:bg-rose-600 text-white text-sm font-medium transition-colors ml-4">
+              Delete Organization
+            </button>
           </div>
         </div>
-      )}
+      </div>
     </div>
   );
 }

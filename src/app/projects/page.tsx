@@ -5,7 +5,6 @@ import { useEffect, useState } from 'react';
 import Link from 'next/link';
 import { api, type Project } from '@/lib/api';
 import { useAuth } from '@/contexts/AuthContext';
-import { PermissionGuard } from '@/components/PermissionGuard';
 
 export default function ProjectsPage() {
   const { getCurrentOrgId } = useAuth();
@@ -74,14 +73,12 @@ export default function ProjectsPage() {
             Manage your test automation projects
           </p>
         </div>
-        <PermissionGuard permission="PROJECT_CREATE">
-          <button
-            onClick={() => setShowCreateModal(true)}
-            className="px-4 py-2 rounded-lg bg-emerald-500 hover:bg-emerald-600 text-white text-sm font-medium transition-colors"
-          >
-            + Create Project
-          </button>
-        </PermissionGuard>
+        <button
+          onClick={() => setShowCreateModal(true)}
+          className="px-4 py-2 rounded-lg bg-emerald-500 hover:bg-emerald-600 text-white text-sm font-medium transition-colors"
+        >
+          + Create Project
+        </button>
       </div>
 
       {projects.length === 0 ? (
@@ -92,14 +89,12 @@ export default function ProjectsPage() {
             <p className="text-sm mb-6">
               Create your first project to organize your test applications
             </p>
-            <PermissionGuard permission="PROJECT_CREATE">
-              <button
-                onClick={() => setShowCreateModal(true)}
-                className="px-6 py-3 rounded-lg bg-emerald-500 hover:bg-emerald-600 text-white font-medium transition-colors"
-              >
-                Create Your First Project
-              </button>
-            </PermissionGuard>
+            <button
+              onClick={() => setShowCreateModal(true)}
+              className="px-6 py-3 rounded-lg bg-emerald-500 hover:bg-emerald-600 text-white font-medium transition-colors"
+            >
+              Create Your First Project
+            </button>
           </div>
         </div>
       ) : (

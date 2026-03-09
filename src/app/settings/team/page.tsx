@@ -4,7 +4,6 @@
 import { useState, useEffect } from 'react';
 import { useAuth } from '@/contexts/AuthContext';
 import { api } from '@/lib/api';
-import { usePermission } from '@/components/PermissionGuard';
 
 interface TeamMember {
   id: string;
@@ -32,7 +31,9 @@ const ROLE_OPTIONS = [
   { value: 'ORG_OWNER', label: 'Organization Owner', description: 'Full access to everything' },
   { value: 'ORG_ADMIN', label: 'Organization Admin', description: 'Manage organization except deletion' },
   { value: 'PROJECT_ADMIN', label: 'Project Admin', description: 'Manage projects and applications' },
+  { value: 'QA_LEAD', label: 'QA Lead', description: 'Full visibility, manage flaky tests' },
   { value: 'PROJECT_MEMBER', label: 'Project Member', description: 'Create apps and view runs' },
+  { value: 'DEVELOPER', label: 'Developer', description: 'Submit runs and view results' },
   { value: 'VIEWER', label: 'Viewer', description: 'Read-only access' },
 ];
 
@@ -46,9 +47,6 @@ export default function TeamManagementPage() {
   const [showInviteModal, setShowInviteModal] = useState(false);
   const [editingMember, setEditingMember] = useState<TeamMember | null>(null);
   const [removingMember, setRemovingMember] = useState<TeamMember | null>(null);
-
-  const canManage = usePermission('ORG_MANAGE_MEMBERS');
-  const canInvite = usePermission('ORG_INVITE');
 
   useEffect(() => {
     loadTeamData();
@@ -87,7 +85,9 @@ export default function TeamManagementPage() {
       ORG_OWNER: 'bg-purple-500/20 text-purple-300 border-purple-500/30',
       ORG_ADMIN: 'bg-blue-500/20 text-blue-300 border-blue-500/30',
       PROJECT_ADMIN: 'bg-emerald-500/20 text-emerald-300 border-emerald-500/30',
+      QA_LEAD: 'bg-amber-500/20 text-amber-300 border-amber-500/30',
       PROJECT_MEMBER: 'bg-cyan-500/20 text-cyan-300 border-cyan-500/30',
+      DEVELOPER: 'bg-orange-500/20 text-orange-300 border-orange-500/30',
       VIEWER: 'bg-slate-500/20 text-slate-300 border-slate-500/30',
     };
     return colors[role] || colors.VIEWER;
@@ -113,14 +113,12 @@ export default function TeamManagementPage() {
             Manage your organization members and invitations
           </p>
         </div>
-        {canInvite && (
-          <button
-            onClick={() => setShowInviteModal(true)}
-            className="px-4 py-2 rounded-lg bg-emerald-500 hover:bg-emerald-600 text-white text-sm font-medium transition-colors"
-          >
-            + Invite Member
-          </button>
-        )}
+        <button
+          onClick={() => setShowInviteModal(true)}
+          className="px-4 py-2 rounded-lg bg-emerald-500 hover:bg-emerald-600 text-white text-sm font-medium transition-colors"
+        >
+          + Invite Member
+        </button>
       </div>
 
       {/* Success/Error Messages */}
@@ -169,22 +167,20 @@ export default function TeamManagementPage() {
                   )}
                 </div>
 
-                {canManage && (
-                  <div className="flex items-center gap-2 ml-4">
-                    <button
-                      onClick={() => setEditingMember(member)}
-                      className="px-3 py-1 rounded bg-slate-700 hover:bg-slate-600 text-sm transition-colors"
-                    >
-                      Edit Role
-                    </button>
-                    <button
-                      onClick={() => setRemovingMember(member)}
-                      className="px-3 py-1 rounded bg-rose-500/20 hover:bg-rose-500/30 text-rose-300 text-sm transition-colors"
-                    >
-                      Remove
-                    </button>
-                  </div>
-                )}
+                <div className="flex items-center gap-2 ml-4">
+                  <button
+                    onClick={() => setEditingMember(member)}
+                    className="px-3 py-1 rounded bg-slate-700 hover:bg-slate-600 text-sm transition-colors"
+                  >
+                    Edit Role
+                  </button>
+                  <button
+                    onClick={() => setRemovingMember(member)}
+                    className="px-3 py-1 rounded bg-rose-500/20 hover:bg-rose-500/30 text-rose-300 text-sm transition-colors"
+                  >
+                    Remove
+                  </button>
+                </div>
               </div>
             );
           })}
@@ -218,7 +214,18 @@ export default function TeamManagementPage() {
                   <button className="px-3 py-1 rounded bg-amber-500/20 hover:bg-amber-500/30 text-amber-300 text-sm transition-colors">
                     Resend
                   </button>
-                  <button className="px-3 py-1 rounded bg-rose-500/20 hover:bg-rose-500/30 text-rose-300 text-sm transition-colors">
+                  <button
+                    onClick={async () => {
+                      try {
+                        await api.invitations.cancel(invitation.id);
+                        setSuccess('Invitation cancelled');
+                        loadTeamData();
+                      } catch (err: any) {
+                        setError(err.message || 'Failed to cancel invitation');
+                      }
+                    }}
+                    className="px-3 py-1 rounded bg-rose-500/20 hover:bg-rose-500/30 text-rose-300 text-sm transition-colors"
+                  >
                     Cancel
                   </button>
                 </div>
@@ -292,7 +299,17 @@ function InviteMemberModal({
         return;
       }
 
-      await api.organizations.inviteMember(orgId, { email, role });
+      const result = await api.organizations.inviteMember(orgId, { email, role });
+      const { acceptUrl } = result.invitation;
+
+      // Open email client (Outlook/Gmail/etc) with invite pre-filled
+      const subject = encodeURIComponent("You've been invited to join QOP");
+      const roleName = ROLE_OPTIONS.find(r => r.value === role)?.label || role;
+      const body = encodeURIComponent(
+        `Hi,\n\nYou've been invited to join QOP as ${roleName}.\n\nClick the link below to accept your invitation:\n${acceptUrl}\n\nThis invitation expires in 7 days.\n\nWelcome aboard!`
+      );
+      window.open(`mailto:${email}?subject=${subject}&body=${body}`, '_blank');
+
       onSuccess();
     } catch (err: any) {
       setError(err.message || 'Failed to send invitation');

@@ -3,7 +3,6 @@
 
 import { usePathname } from 'next/navigation';
 import Link from 'next/link';
-import { usePermission } from '@/components/PermissionGuard';
 
 export default function SettingsLayout({
   children,
@@ -11,15 +10,13 @@ export default function SettingsLayout({
   children: React.ReactNode;
 }) {
   const pathname = usePathname();
-  const canViewOrg = usePermission('ORG_VIEW');
-  const canManageTeam = usePermission('ORG_MANAGE_MEMBERS');
 
   const navItems = [
-    { href: '/settings/profile', label: 'Profile', icon: '👤', show: true },
-    { href: '/settings/organization', label: 'Organization', icon: '🏢', show: canViewOrg },
-    { href: '/settings/team', label: 'Team', icon: '👥', show: canManageTeam },
-    { href: '/settings/api-keys', label: 'API Keys', icon: '🔑', show: true },
-    { href: '/settings/preferences', label: 'Preferences', icon: '⚙️', show: true },
+    { href: '/settings/profile', label: 'Profile', icon: '👤' },
+    { href: '/settings/organization', label: 'Organization', icon: '🏢' },
+    { href: '/settings/team', label: 'Team', icon: '👥' },
+    { href: '/settings/api-keys', label: 'API Keys', icon: '🔑' },
+    { href: '/settings/preferences', label: 'Preferences', icon: '⚙️' },
   ];
 
   return (
@@ -35,7 +32,7 @@ export default function SettingsLayout({
         {/* Sidebar Navigation */}
         <aside className="w-56 flex-shrink-0">
           <nav className="sticky top-6 space-y-1">
-            {navItems.filter(item => item.show).map((item) => {
+            {navItems.map((item) => {
               const isActive = pathname === item.href;
               return (
                 <Link

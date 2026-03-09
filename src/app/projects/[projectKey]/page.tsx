@@ -6,7 +6,6 @@ import Link from 'next/link';
 import { useParams } from 'next/navigation';
 import { api, type Project, type Application, type TestRun } from '@/lib/api';
 import { useAuth } from '@/contexts/AuthContext';
-import { PermissionGuard } from '@/components/PermissionGuard';
 
 export default function ProjectDetailPage() {
   const params = useParams();
@@ -103,14 +102,12 @@ export default function ProjectDetailPage() {
             <p className="text-sm text-slate-400 mt-2">{project.description}</p>
           )}
         </div>
-        <PermissionGuard permission="APP_CREATE">
-          <button
-            onClick={() => setShowCreateAppModal(true)}
-            className="px-4 py-2 rounded-lg bg-emerald-500 hover:bg-emerald-600 text-white text-sm font-medium transition-colors"
-          >
-            + Add Application
-          </button>
-        </PermissionGuard>
+        <button
+          onClick={() => setShowCreateAppModal(true)}
+          className="px-4 py-2 rounded-lg bg-emerald-500 hover:bg-emerald-600 text-white text-sm font-medium transition-colors"
+        >
+          + Add Application
+        </button>
       </div>
 
       {/* Stats */}
@@ -138,14 +135,12 @@ export default function ProjectDetailPage() {
               <p className="text-sm mb-4">
                 Add your first test application to this project
               </p>
-              <PermissionGuard permission="APP_CREATE">
-                <button
-                  onClick={() => setShowCreateAppModal(true)}
-                  className="px-6 py-3 rounded-lg bg-emerald-500 hover:bg-emerald-600 text-white font-medium transition-colors"
-                >
-                  Add Application
-                </button>
-              </PermissionGuard>
+              <button
+                onClick={() => setShowCreateAppModal(true)}
+                className="px-6 py-3 rounded-lg bg-emerald-500 hover:bg-emerald-600 text-white font-medium transition-colors"
+              >
+                Add Application
+              </button>
             </div>
           </div>
         ) : (

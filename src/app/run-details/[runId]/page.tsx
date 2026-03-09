@@ -113,7 +113,8 @@ function AIAnalysisModal({
     setAnalyzingCode(true);
     try {
       // Call the Python API directly to analyze code
-      const response = await fetch('http://localhost:8000/api/ai-analysis/analyze-code', {
+      const pythonApiUrl = process.env.NEXT_PUBLIC_PYTHON_API_URL || 'http://localhost:8000';
+      const response = await fetch(`${pythonApiUrl}/api/ai-analysis/analyze-code`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',

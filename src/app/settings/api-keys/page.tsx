@@ -4,8 +4,6 @@
 import { useState, useEffect } from 'react';
 import { useAuth } from '@/contexts/AuthContext';
 import { api, type Project, type ApiKey } from '@/lib/api';
-import { usePermission } from '@/components/PermissionGuard';
-
 export default function ApiKeysPage() {
   const { getCurrentOrgId } = useAuth();
   const [projects, setProjects] = useState<Project[]>([]);
@@ -16,10 +14,6 @@ export default function ApiKeysPage() {
   const [success, setSuccess] = useState('');
   const [showCreateModal, setShowCreateModal] = useState(false);
   const [newApiKey, setNewApiKey] = useState<{ key: string; label: string } | null>(null);
-
-  const canView = usePermission('API_KEY_VIEW');
-  const canCreate = usePermission('API_KEY_CREATE');
-  const canDelete = usePermission('API_KEY_DELETE');
 
   useEffect(() => {
     loadProjects();
@@ -106,7 +100,7 @@ export default function ApiKeysPage() {
             Manage API keys for your automation test runners
           </p>
         </div>
-        {canCreate && selectedProjectKey && (
+        {selectedProjectKey && (
           <button
             onClick={() => setShowCreateModal(true)}
             className="px-4 py-2 rounded-lg bg-emerald-500 hover:bg-emerald-600 text-white text-sm font-medium transition-colors"
@@ -179,7 +173,7 @@ export default function ApiKeysPage() {
                       </div>
                     </div>
 
-                    {!key.revokedAt && canDelete && (
+                    {!key.revokedAt && (
                       <button
                         onClick={() => handleRevoke(key.id)}
                         className="px-3 py-1 rounded bg-rose-500/20 hover:bg-rose-500/30 text-rose-300 text-sm transition-colors"
