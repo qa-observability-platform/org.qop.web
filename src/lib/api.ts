@@ -1,6 +1,6 @@
 // src/lib/api.ts
 
-const API_BASE = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:4000';
+const API_BASE = process.env.NEXT_PUBLIC_QOP_API_URL || process.env.NEXT_PUBLIC_API_URL || 'http://localhost:4000';
 
 export interface ApiError {
   error: string;
@@ -254,8 +254,9 @@ class ApiClient {
         },
       });
 
-      // Handle 401 Unauthorized - token expired
-      if (response.status === 401 && retryCount === 0) {
+      // Handle 401 Unauthorized - token expired (skip for auth endpoints)
+      const isAuthEndpoint = endpoint.startsWith('/auth/');
+      if (response.status === 401 && retryCount === 0 && !isAuthEndpoint) {
         console.log('[API] Access token expired, refreshing...');
 
         try {
@@ -428,8 +429,8 @@ class ApiClient {
     inviteMember: async (orgId: string, data: {
       email: string;
       role: string;
-    }): Promise<void> => {
-      await this.request<void>(`/organizations/${orgId}/invitations`, {
+    }): Promise<{ invitation: { email: string; role: string; acceptUrl: string } }> => {
+      return this.request<{ invitation: { email: string; role: string; acceptUrl: string } }>(`/organizations/${orgId}/invitations`, {
         method: 'POST',
         body: JSON.stringify(data),
       });
@@ -685,6 +686,23 @@ class ApiClient {
         }
       }>('/users/me/preferences');
       return data.preferences;
+    },
+  };
+
+  invitations = {
+    accept: async (token: string, data?: {
+      password?: string;
+      firstName?: string;
+      lastName?: string;
+    }): Promise<{ user: { id: string; email: string; firstName: string | null; lastName: string | null } }> => {
+      return this.request(`/invitations/${token}/accept`, {
+        method: 'POST',
+        body: JSON.stringify(data || {}),
+      });
+    },
+
+    cancel: async (id: string): Promise<void> => {
+      return this.request(`/invitations/${id}`, { method: 'DELETE' });
     },
   };
 }
