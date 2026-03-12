@@ -30,6 +30,7 @@ function LoginForm() {
   const [loading, setLoading] = useState(false);
 
   const redirectTo = searchParams.get('redirect') || '/';
+  const justRegistered = searchParams.get('registered') === 'true';
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -61,6 +62,12 @@ function LoginForm() {
         {/* Login Card */}
         <div className="bg-slate-900/60 backdrop-blur-sm border border-slate-800 rounded-xl p-8 shadow-2xl">
           <h1 className="text-2xl font-semibold mb-6">Sign In</h1>
+
+          {justRegistered && (
+            <div className="mb-6 p-4 rounded-lg bg-emerald-500/10 border border-emerald-500/30 text-emerald-300 text-sm">
+              Account created successfully! Please sign in.
+            </div>
+          )}
 
           {error && (
             <div className="mb-6 p-4 rounded-lg bg-rose-500/10 border border-rose-500/30 text-rose-300 text-sm">

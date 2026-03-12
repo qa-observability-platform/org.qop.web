@@ -82,9 +82,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   }) => {
     try {
       await api.auth.register(data);
-      
-      // Auto-login after registration
-      await login(data.email, data.password);
+      router.push('/auth/login?registered=true');
     } catch (error: any) {
       console.error('Registration failed:', error);
       throw new Error(error.message || 'Registration failed');
