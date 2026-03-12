@@ -67,11 +67,28 @@ export default function ApiKeysDocsPage() {
           API keys follow this format:
         </p>
         <pre className="p-3 rounded-lg bg-slate-800 border border-slate-700 text-sm font-mono text-emerald-300 overflow-x-auto">
-{`qop_live_a1b2c3d4e5f6...`}
+{`qop_a1b2c3d4e5f6g7h8i9j0k1l2m3n4o5p6q7r8s9t0u1v2w3x4y5z6a7b8c9d0e1f2`}
         </pre>
         <p className="text-xs text-slate-500">
-          The key is hashed (SHA-256) before storage. QOP never stores the plain key.
+          64-character hex string prefixed with <code className="text-slate-400">qop_</code>.
+          The key is hashed (SHA-256) before storage — QOP never stores the plain key.
         </p>
+
+        <div className="p-3 rounded-lg bg-slate-800 border border-slate-700 space-y-2">
+          <p className="text-xs font-medium text-slate-300">Two ways to generate a key:</p>
+          <div className="space-y-2 text-xs text-slate-400">
+            <div>
+              <span className="text-emerald-400 font-medium">Via Dashboard (recommended):</span>
+              <span className="ml-2">Settings → API Keys → + Create API Key</span>
+            </div>
+            <div>
+              <span className="text-emerald-400 font-medium">Via CLI:</span>
+              <pre className="mt-1 p-2 rounded bg-slate-900 text-slate-300 font-mono overflow-x-auto">
+{`docker compose exec nodeapi npm run create:apikey -- <application_id> [label]`}
+              </pre>
+            </div>
+          </div>
+        </div>
       </div>
 
       {/* Security notes */}

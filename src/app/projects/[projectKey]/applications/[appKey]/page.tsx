@@ -5,13 +5,13 @@ import { useEffect, useState, useCallback } from 'react';
 import Link from 'next/link';
 import { useParams } from 'next/navigation';
 import { api, type Application, type TestRun } from '@/lib/api';
-
-const DEFAULT_ORG_ID = 'c8bd05c6-b5e2-4e2a-9ea2-ab672b2b0f95';
+import { useAuth } from '@/contexts/AuthContext';
 
 export default function ApplicationDetailPage() {
   const params = useParams();
   const projectKey = params.projectKey as string;
   const appKey = params.appKey as string;
+  const { getCurrentOrgId } = useAuth();
 
   const [application, setApplication] = useState<Application | null>(null);
   const [runs, setRuns] = useState<TestRun[]>([]);
@@ -22,8 +22,14 @@ export default function ApplicationDetailPage() {
   const loadApplicationData = useCallback(async () => {
     try {
       setLoading(true);
+      const orgId = getCurrentOrgId();
+      if (!orgId) {
+        setError('No organization found for user');
+        setLoading(false);
+        return;
+      }
       const [appData, runsData] = await Promise.all([
-        api.applications.get(projectKey, appKey, DEFAULT_ORG_ID),
+        api.applications.get(projectKey, appKey, orgId),
         api.runs.list({ projectKey, appKey, limit: 50 }),
       ]);
 
