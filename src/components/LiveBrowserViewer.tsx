@@ -30,8 +30,8 @@ export default function LiveBrowserViewer({ runId, testCaseExecutionId }: LiveBr
   useEffect(() => {
     console.log('[LiveBrowserViewer] Starting connection for runId:', runId);
 
-    // Build WebSocket URL - always use ws://localhost:4000
-    const streamUrl = `ws://localhost:4000/ws/browser-stream?runId=${runId}${testCaseExecutionId ? `&testCaseExecutionId=${testCaseExecutionId}` : ''}`;
+    const wsBase = (typeof window !== 'undefined' && window.__QOP_CONFIG__?.wsUrl) || process.env.NEXT_PUBLIC_QOP_WS_URL || 'ws://localhost:4000';
+    const streamUrl = `${wsBase}/ws/browser-stream?runId=${runId}${testCaseExecutionId ? `&testCaseExecutionId=${testCaseExecutionId}` : ''}`;
     console.log('[LiveBrowserViewer] Connecting to:', streamUrl);
 
     const ws = new WebSocket(streamUrl);

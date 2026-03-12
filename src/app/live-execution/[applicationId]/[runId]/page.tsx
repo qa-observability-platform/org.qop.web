@@ -5,9 +5,10 @@ import { useParams } from 'next/navigation';
 import Link from 'next/link';
 import { tokenStorage } from '@/lib/api';
 import LiveBrowserViewer from '@/components/LiveBrowserViewer';
+import { getApiBase, getWsBase } from '@/lib/config';
 
-const API_BASE = process.env.NEXT_PUBLIC_QOP_API_URL || 'http://localhost:4000';
-const WS_BASE = process.env.NEXT_PUBLIC_QOP_WS_URL || 'ws://localhost:4000';
+const API_BASE = getApiBase();
+const WS_BASE = getWsBase();
 
 type AIAnalysis = {
   category: string;

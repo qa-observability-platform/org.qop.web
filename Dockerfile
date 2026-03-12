@@ -6,15 +6,8 @@ RUN npm ci
 
 COPY . .
 
-# NEXT_PUBLIC_* vars are baked in at build time
-ARG NEXT_PUBLIC_QOP_API_URL=http://localhost:4000
-ARG NEXT_PUBLIC_QOP_WS_URL=ws://localhost:4000
-ARG NEXT_PUBLIC_API_BASE_URL=http://localhost:4000
-
-ENV NEXT_PUBLIC_QOP_API_URL=$NEXT_PUBLIC_QOP_API_URL
-ENV NEXT_PUBLIC_QOP_WS_URL=$NEXT_PUBLIC_QOP_WS_URL
-ENV NEXT_PUBLIC_API_BASE_URL=$NEXT_PUBLIC_API_BASE_URL
-
+# URLs are injected at runtime via window.__QOP_CONFIG__ (layout.tsx server component).
+# No build-time baking needed — the same Docker image works for any server.
 RUN npx next build --no-lint
 
 # ---- Production image ----

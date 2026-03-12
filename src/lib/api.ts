@@ -1,6 +1,7 @@
 // src/lib/api.ts
+import { getApiBase } from './config';
 
-const API_BASE = process.env.NEXT_PUBLIC_QOP_API_URL || process.env.NEXT_PUBLIC_API_URL || 'http://localhost:4000';
+const API_BASE = getApiBase();
 
 export interface ApiError {
   error: string;
