@@ -8,11 +8,17 @@ export default function ForgotPasswordPage() {
   const [email, setEmail] = useState('');
   const [submitted, setSubmitted] = useState(false);
   const [loading, setLoading] = useState(false);
+  const [error, setError] = useState('');
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    setError('');
+
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!email.trim()) return setError('Email is required.');
+    if (!emailRegex.test(email)) return setError('Enter a valid email address.');
+
     setLoading(true);
-    // Simulate a short delay so it doesn't feel instant
     await new Promise((r) => setTimeout(r, 800));
     setLoading(false);
     setSubmitted(true);
@@ -56,6 +62,12 @@ export default function ForgotPasswordPage() {
               <p className="text-sm text-slate-400 mb-6">
                 Enter your email address and we'll send you a reset link.
               </p>
+
+              {error && (
+                <div className="mb-4 p-4 rounded-lg bg-rose-500/10 border border-rose-500/30 text-rose-300 text-sm">
+                  {error}
+                </div>
+              )}
 
               <form onSubmit={handleSubmit} className="space-y-4">
                 <div>

@@ -41,18 +41,14 @@ export default function RegisterPage() {
     e.preventDefault();
     setError('');
 
-    if (formData.password !== formData.confirmPassword) {
-      setError('Passwords do not match');
-      return;
-    }
-    if (formData.password.length < 8) {
-      setError('Password must be at least 8 characters long');
-      return;
-    }
-    if (!formData.organizationName.trim()) {
-      setError('Organization name is required');
-      return;
-    }
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!formData.organizationName.trim()) return setError('Organization name is required.');
+    if (!formData.email.trim()) return setError('Email is required.');
+    if (!emailRegex.test(formData.email)) return setError('Enter a valid email address.');
+    if (!formData.password) return setError('Password is required.');
+    if (formData.password.length < 8) return setError('Password must be at least 8 characters.');
+    if (!formData.confirmPassword) return setError('Please confirm your password.');
+    if (formData.password !== formData.confirmPassword) return setError('Passwords do not match.');
 
     setLoading(true);
     try {

@@ -35,8 +35,15 @@ function LoginForm() {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError('');
-    setLoading(true);
 
+    // Client-side validation
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!email.trim()) return setError('Email is required.');
+    if (!emailRegex.test(email)) return setError('Enter a valid email address.');
+    if (!password) return setError('Password is required.');
+    if (password.length < 8) return setError('Password must be at least 8 characters.');
+
+    setLoading(true);
     try {
       await login(email, password);
       router.push(redirectTo);
