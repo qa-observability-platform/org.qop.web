@@ -20,8 +20,8 @@ export default function UserMenu() {
     );
   }
 
-  const primaryRole = user.roles[0];
-  const orgRole = user.roles.find(r => r.scope === 'ORGANIZATION');
+  const primaryRole = user.roles?.[0];
+  const orgRole = user.roles?.find(r => r.scope === 'ORGANIZATION');
 
   return (
     <div className="relative">
@@ -31,7 +31,7 @@ export default function UserMenu() {
       >
         <div className="flex items-center gap-3">
           <div className="w-8 h-8 rounded-full bg-emerald-500/20 text-emerald-400 flex items-center justify-center text-sm font-semibold">
-            {user.firstName?.[0] || user.email[0].toUpperCase()}
+            {user.firstName?.[0] || user.email?.[0]?.toUpperCase() || '?'}
           </div>
           <div className="flex-1 min-w-0">
             <div className="text-sm font-medium truncate">
