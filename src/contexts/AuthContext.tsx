@@ -64,8 +64,10 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       const response = await api.auth.login({ email, password });
       
       tokenStorage.setTokens(response.tokens);
-      setUser(response.user);
-      
+      // Fetch full user with roles (login response omits roles)
+      const fullUser = await api.auth.getCurrentUser();
+      setUser(fullUser);
+
       router.push('/');
     } catch (error: any) {
       console.error('Login failed:', error);

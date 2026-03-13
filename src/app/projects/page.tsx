@@ -107,6 +107,7 @@ export default function ProjectsPage() {
 
       {showCreateModal && (
         <CreateProjectModal
+          existingCount={projects.length}
           onClose={() => setShowCreateModal(false)}
           onSuccess={() => {
             setShowCreateModal(false);
@@ -181,10 +182,19 @@ function ProjectCard({ project }: { project: Project }) {
   );
 }
 
+function generateProjectKey(name: string, existingCount: number): string {
+  // Take first 4 alpha chars from name as uppercase prefix
+  const prefix = name.replace(/[^a-zA-Z]/g, '').substring(0, 4).toUpperCase() || 'PRJ';
+  const seq = String(existingCount + 1).padStart(3, '0');
+  return `${prefix}-${seq}`;
+}
+
 function CreateProjectModal({
+  existingCount,
   onClose,
   onSuccess,
 }: {
+  existingCount: number;
   onClose: () => void;
   onSuccess: () => void;
 }) {
@@ -219,9 +229,8 @@ function CreateProjectModal({
     }
   };
 
-  const handleProjectKeyChange = (value: string) => {
-    // Auto-generate project key from name
-    const key = value.toLowerCase().replace(/[^a-z0-9]+/g, '-');
+  const handleNameChange = (value: string) => {
+    const key = generateProjectKey(value, existingCount);
     setFormData({ ...formData, projectKey: key, name: value });
   };
 
@@ -236,7 +245,7 @@ function CreateProjectModal({
             <input
               type="text"
               value={formData.name}
-              onChange={(e) => handleProjectKeyChange(e.target.value)}
+              onChange={(e) => handleNameChange(e.target.value)}
               className="w-full px-3 py-2 rounded bg-slate-800 border border-slate-700 focus:border-emerald-500 focus:outline-none"
               placeholder="My E-commerce App"
               required
@@ -249,15 +258,15 @@ function CreateProjectModal({
               type="text"
               value={formData.projectKey}
               onChange={(e) =>
-                setFormData({ ...formData, projectKey: e.target.value })
+                setFormData({ ...formData, projectKey: e.target.value.toUpperCase() })
               }
-              className="w-full px-3 py-2 rounded bg-slate-800 border border-slate-700 focus:border-emerald-500 focus:outline-none font-mono text-sm"
-              placeholder="my-ecommerce-app"
-              pattern="^[a-z0-9-]+$"
+              className="w-full px-3 py-2 rounded bg-slate-800 border border-slate-700 focus:border-emerald-500 focus:outline-none font-mono text-sm tracking-widest"
+              placeholder="MYEC-001"
+              pattern="^[A-Z0-9]+-[0-9]+$"
               required
             />
             <p className="text-xs text-slate-500 mt-1">
-              Lowercase letters, numbers, and hyphens only
+              Auto-generated from name — format: <span className="font-mono text-slate-400">PREFIX-NNN</span> (editable)
             </p>
           </div>
 
