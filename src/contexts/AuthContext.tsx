@@ -108,7 +108,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     if (!user) return null;
 
     // Find the user's organization role (ORG_OWNER, ORG_ADMIN, etc.)
-    const orgRole = user.roles.find(
+    const orgRole = user.roles?.find(
       (role) => role.scope === 'ORGANIZATION' && role.scopeId
     );
 
