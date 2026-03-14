@@ -18,7 +18,10 @@ export default defineConfig({
 });
 
 // .env
-QOP_API_KEY=your_api_key_here`,
+QOP_WS_URL=ws://YOUR_SERVER_IP:4000/ws/ingest
+QOP_API_KEY=your_api_key_here
+QOP_PROJECT_KEY=your-project-key
+QOP_APP_KEY=your-app-name`,
     run: `npx playwright test`,
   },
   puppeteer: {
@@ -32,17 +35,19 @@ module.exports = {
 };
 
 // .env
-QOP_API_KEY=your_api_key_here`,
-    run: `npx jest`,
+QOP_WS_URL=ws://YOUR_SERVER_IP:4000/ws/ingest
+QOP_API_KEY=your_api_key_here
+QOP_PROJECT_KEY=your-project-key
+QOP_APP_KEY=your-app-name`,
+    run: `npm test`,
   },
   pytest: {
-    install: `pip install qop-pytest`,
-    configure: `# pytest.ini or pyproject.toml
-[pytest]
-addopts = -p qop_pytest.reporter
-
-# .env or shell
-export QOP_API_KEY=your_api_key_here`,
+    install: `pip install qa-observability-platform-pytest`,
+    configure: `# .env (plugin registers automatically — no pytest.ini changes needed)
+QOP_WS_URL=ws://YOUR_SERVER_IP:4000/ws/ingest
+QOP_API_KEY=your_api_key_here
+QOP_PROJECT_KEY=your-project-key
+QOP_APP_KEY=your-app-name`,
     run: `pytest`,
   },
   selenium: {
